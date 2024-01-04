@@ -9,6 +9,7 @@ My homelab DNS resolver.
     - [ ] [hosts file](https://en.wikipedia.org/wiki/Hosts_(file)) based resolver
     - [ ] delegating resolver (e.g. delegating queries to [1.1.1.1](https://1.1.1.1/))
     - [ ] static host list resolver
+- [ ] available as [Nix Flake](https://nixos.wiki/wiki/Flakes)
 
 # Example Configuration
 

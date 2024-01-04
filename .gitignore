@@ -1,0 +1,6 @@
+# idea stuff
+*.iml
+.idea
+
+# project stuff
+dres

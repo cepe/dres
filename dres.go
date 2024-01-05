@@ -20,10 +20,12 @@ func main() {
 func handleRequest(writer dns.ResponseWriter, msg *dns.Msg) {
 	response, err := dns.Exchange(msg, "1.1.1.1:53")
 	if err != nil {
-		log.Fatalf("Failed to delegate query. See error %s", err)
+		log.Printf("Failed to delegate query. See error %s", err)
+		_ = writer.Close()
+		return
 	}
 
 	if writer.WriteMsg(response) != nil {
-		log.Fatalf("Unable to response. See error %s", err)
+		log.Printf("Unable to response. See error %s", err)
 	}
 }

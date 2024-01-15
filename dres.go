@@ -19,6 +19,10 @@ func main() {
 
 func handleRequest(writer dns.ResponseWriter, msg *dns.Msg) {
 	response, err := dns.Exchange(msg, "1.1.1.1:53")
+	log.Printf("Request from %s", writer.RemoteAddr())
+	for idx, question := range msg.Question {
+		log.Printf("  question %d: %s", idx, question.Name)
+	}
 	if err != nil {
 		log.Printf("Failed to delegate query. See error %s", err)
 		_ = writer.Close()

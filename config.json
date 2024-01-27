@@ -1,4 +1,8 @@
 {
+  "cidrs": {
+    "all-v4": "0.0.0.0/0",
+    "all-v6": "::/0"
+  },
   "resolvers": {
     "google": {
       "type": "delegating",
@@ -8,5 +12,13 @@
       "type": "delegating",
       "socket": "1.1.1.1:53"
     }
+  },
+  "configuration": {
+    "all-v4": [
+      "cloudflare"
+    ],
+    "all-v6": [
+      "google"
+    ]
   }
 }

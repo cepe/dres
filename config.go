@@ -14,8 +14,9 @@ type DresConfig struct {
 }
 
 type ResolverConfig struct {
-	Type   string `json:"type"`
-	Socket string `json:"socket,omitempty"`
+	Type   string            `json:"type"`
+	Socket string            `json:"socket,omitempty"`
+	Hosts  map[string]string `json:"hosts,omitempty"`
 }
 
 func LoadConfig() DresConfig {

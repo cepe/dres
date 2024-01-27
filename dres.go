@@ -21,6 +21,40 @@ func (resolver DelegatingResolver) GetName() string {
 	return resolver.Name
 }
 
+type StaticHostsResolver struct {
+	Name  string
+	Hosts map[string]string
+}
+
+func (resolver StaticHostsResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {
+	if len(msg.Question) > 1 {
+		return nil, errors.New("unable to handle more than one question")
+	}
+	question := msg.Question[0]
+	if question.Qtype != dns.TypeA {
+		return nil, errors.New("unable to handle question other than A")
+	}
+
+	hostName := question.Name[:len(question.Name)-1]
+	ip, ok := resolver.Hosts[hostName]
+	if !ok {
+		errorMessage := fmt.Sprintf("static mapping for %s not found", hostName)
+		return nil, errors.New(errorMessage)
+	}
+	msg.Authoritative = true
+	dom := question.Name
+	msg.Answer = make([]dns.RR, 1)
+	msg.Answer[0] = &dns.A{
+		Hdr: dns.RR_Header{Name: dom, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 0},
+		A:   net.ParseIP(ip),
+	}
+	return msg, nil
+}
+
+func (resolver StaticHostsResolver) GetName() string {
+	return resolver.Name
+}
+
 func LoadResolver(name string, config ResolverConfig) (Resolver, error) {
 	if config.Type == "delegating" {
 		return DelegatingResolver{
@@ -28,7 +62,14 @@ func LoadResolver(name string, config ResolverConfig) (Resolver, error) {
 			Socket: config.Socket,
 		}, nil
 	}
-	return nil, errors.New("unable to construct resolver for configuration")
+	if config.Type == "static" {
+		return StaticHostsResolver{
+			Name:  name,
+			Hosts: config.Hosts,
+		}, nil
+	}
+	errorMessage := fmt.Sprintf("unable to construct resolver of type %s", config.Type)
+	return nil, errors.New(errorMessage)
 }
 
 type Resolver interface {
@@ -56,7 +97,7 @@ func (dres Dres) HandleFunc(writer dns.ResponseWriter, msg *dns.Msg) {
 		if err != nil {
 			log.Printf("Resolver %s failed to handle query: %s", resolver.GetName(), err)
 		} else {
-			log.Printf("Answer from resolver %s: %s", resolver.GetName(), response.Answer)
+			log.Printf("Answer from resolver %s", resolver.GetName())
 			if writer.WriteMsg(response) != nil {
 				log.Printf("Unable to response. See error %s", err)
 			} else {

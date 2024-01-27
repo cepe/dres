@@ -11,13 +11,22 @@
     "cloudflare": {
       "type": "delegating",
       "socket": "1.1.1.1:53"
+    },
+    "intranet": {
+      "type": "static",
+      "hosts": {
+        "printer.home.lab": "10.0.1.10",
+        "media-center.home.lab": "10.0.1.20"
+      }
     }
   },
   "configuration": {
     "all-v4": [
+      "intranet",
       "cloudflare"
     ],
     "all-v6": [
+      "intranet",
       "google"
     ]
   }

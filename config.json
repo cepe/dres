@@ -1,0 +1,12 @@
+{
+  "resolvers": {
+    "google": {
+      "type": "delegating",
+      "socket": "8.8.8.8:53"
+    },
+    "cloudflare": {
+      "type": "delegating",
+      "socket": "1.1.1.1:53"
+    }
+  }
+}

@@ -4,11 +4,11 @@ My homelab DNS resolver.
 
 # Goal
 
-- [ ] configurable behavior per network's [CIDR](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
+- [x] configurable behavior per network's [CIDR](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
 - [ ] support different types of resolvers:
     - [ ] [hosts file](https://en.wikipedia.org/wiki/Hosts_(file)) based resolver
     - [x] delegating resolver (e.g. delegating queries to [1.1.1.1](https://1.1.1.1/))
-    - [ ] static host list resolver
+    - [x] static host list resolver
 - [x] available as [Nix Flake](https://nixos.wiki/wiki/Flakes)
 
 # Example Configuration

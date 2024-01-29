@@ -1,19 +1,83 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/miekg/dns"
+	"log"
 	"net"
+	"os"
+	"strings"
+	"time"
 )
 
 type Resolver interface {
 	Handle(msg *dns.Msg) (*dns.Msg, error)
 	GetName() string
 }
+
 type DelegatingResolver struct {
 	Name   string
 	Socket string
+}
+
+type StaticHostsResolver struct {
+	Name  string
+	Hosts map[string]string
+}
+
+func LoadResolver(name string, config ResolverConfig) (Resolver, error) {
+	if config.Type == "delegating" {
+		return DelegatingResolver{
+			Name:   name,
+			Socket: config.Socket,
+		}, nil
+	}
+	if config.Type == "static" {
+		return StaticHostsResolver{
+			Name:  name,
+			Hosts: config.Hosts,
+		}, nil
+	}
+	if config.Type == "hosts-file" {
+		started := time.Now()
+		hosts, err := ReadHostsMapping(config.Path)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("Resolver %s loaded in %d ms", name, time.Now().Sub(started).Milliseconds())
+
+		return StaticHostsResolver{
+			Name:  name,
+			Hosts: hosts,
+		}, nil
+	}
+	errorMessage := fmt.Sprintf("unable to construct resolver of type %s", config.Type)
+	return nil, errors.New(errorMessage)
+}
+
+func ReadHostsMapping(path string) (map[string]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	scanner := bufio.NewScanner(file)
+
+	hostsMapping := make(map[string]string)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" && !strings.HasPrefix(line, "#") {
+			mapping := strings.Split(line, " ")
+			hostsMapping[mapping[1]] = mapping[0]
+		}
+	}
+
+	return hostsMapping, nil
 }
 
 func (resolver DelegatingResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {
@@ -22,11 +86,6 @@ func (resolver DelegatingResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {
 
 func (resolver DelegatingResolver) GetName() string {
 	return resolver.Name
-}
-
-type StaticHostsResolver struct {
-	Name  string
-	Hosts map[string]string
 }
 
 func (resolver StaticHostsResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {

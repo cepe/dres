@@ -18,14 +18,20 @@
         "printer.home.lab": "10.0.1.10",
         "media-center.home.lab": "10.0.1.20"
       }
+    },
+    "hosts-file": {
+      "type": "hosts-file",
+      "path": "./hosts.file"
     }
   },
   "configuration": {
     "all-v4": [
+      "hosts-file",
       "intranet",
       "cloudflare"
     ],
     "all-v6": [
+      "hosts-file",
       "intranet",
       "google"
     ]

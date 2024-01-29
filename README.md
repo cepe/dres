@@ -1,17 +1,19 @@
 # dres
 
-My homelab DNS resolver.
+My home lab DNS resolver.
 
-# Goal
+# Features
 
 - [x] configurable behavior per network's [CIDR](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
-- [ ] support different types of resolvers:
-    - [ ] [hosts file](https://en.wikipedia.org/wiki/Hosts_(file)) based resolver
+- [x] support different types of resolvers:
+    - [x] [hosts file](https://en.wikipedia.org/wiki/Hosts_(file)) based resolver
     - [x] delegating resolver (e.g. delegating queries to [1.1.1.1](https://1.1.1.1/))
     - [x] static host list resolver
 - [x] available as [Nix Flake](https://nixos.wiki/wiki/Flakes)
 
-# Example Configuration
+# Configuration
+
+Sample configuration in JSON format:
 
 ```json
 {
@@ -36,8 +38,8 @@ My homelab DNS resolver.
     "intranet": {
       "type": "static",
       "hosts": {
-        "printer.example.com": "10.0.1.10",
-        "media-center.example.com": "10.0.1.20"
+        "printer.home.lab": "10.0.1.10",
+        "media-center.home.lab": "10.0.1.20"
       }
     }
   },
@@ -54,5 +56,62 @@ My homelab DNS resolver.
       "cloudflare"
     ]
   }
+}
+```
+
+# Nix Flake
+
+In order to use _dres_ in your NixOS please follow:
+
+Merge following snippet with your `flake.nix` file:
+
+  ```nix
+  {
+    inputs.hosts.url = github:cepe/dres;
+    outputs = { self, nixpkgs, dres, ... } @ inputs: {
+      nixosConfigurations.<hostname> = {
+        system = "<arch>";
+        modules = [
+          dres.nixosModules.default
+        ];
+      };
+    };
+  }
+  ```
+
+Configure _dres_ in your `configuration.nix`:
+```nix
+{config, lib, pkgs, ...} : {
+    dogjam.services.dres = {
+        enable = true;
+        config = {
+            cidrs = {
+                ipv-4 = "0.0.0.0/0";
+            };
+            resolvers = {
+                cloudflare = {
+                    type = "delegating";
+                    socket = "1.1.1.1:53";
+                };
+                intranet = {
+                    type = "static";
+                    hosts = {
+                        "printer.home.lab" = "10.0.0.10";
+                    };
+                };
+                hosts-file = {
+                    type = "hosts-file";
+                    path = "/etc/hosts";
+                };
+            };
+            configuration = {
+                ipv-4 = [
+                    "intranet"
+                    "hosts-file"
+                    "cloudflare"
+                ];
+            };
+        };
+    };
 }
 ```

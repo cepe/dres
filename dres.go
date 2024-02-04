@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sort"
 )
 import "github.com/miekg/dns"
 
@@ -12,8 +13,19 @@ type Network struct {
 	Name string
 	Net  net.IPNet
 }
+
+type Networks []Network
+
+func (networks Networks) Len() int { return len(networks) }
+func (networks Networks) Less(i, j int) bool {
+	s1, _ := networks[i].Net.Mask.Size()
+	s2, _ := networks[j].Net.Mask.Size()
+	return s1 > s2
+}
+func (networks Networks) Swap(i, j int) { networks[i], networks[j] = networks[j], networks[i] }
+
 type Dres struct {
-	Networks  []Network
+	Networks  Networks
 	Resolvers map[string][]Resolver
 }
 
@@ -30,7 +42,7 @@ func Load(config Config) Dres {
 		}
 	}
 
-	var networks []Network
+	var networks Networks
 	for rangeName, cidr := range config.CIDRS {
 		_, ipNet, err := net.ParseCIDR(cidr)
 		if err != nil {
@@ -44,6 +56,8 @@ func Load(config Config) Dres {
 			log.Printf("Loaded network %s: %s", rangeName, cidr)
 		}
 	}
+
+	sort.Sort(networks)
 
 	var resolvers = make(map[string][]Resolver)
 	for rangeName, resolverNames := range config.Configuration {

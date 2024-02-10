@@ -92,6 +92,7 @@ func (resolver StaticHostsResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {
 	if len(msg.Question) > 1 {
 		return nil, errors.New("unable to handle more than one question")
 	}
+
 	question := msg.Question[0]
 	if question.Qtype != dns.TypeA {
 		return nil, errors.New("unable to handle question other than A")
@@ -107,7 +108,7 @@ func (resolver StaticHostsResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {
 	dom := question.Name
 	msg.Answer = make([]dns.RR, 1)
 	msg.Answer[0] = &dns.A{
-		Hdr: dns.RR_Header{Name: dom, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 0},
+		Hdr: dns.RR_Header{Name: dom, Rrtype: question.Qtype, Class: question.Qclass, Ttl: 3600},
 		A:   net.ParseIP(ip),
 	}
 	return msg, nil

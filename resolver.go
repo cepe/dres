@@ -104,14 +104,17 @@ func (resolver StaticHostsResolver) Handle(msg *dns.Msg) (*dns.Msg, error) {
 		errorMessage := fmt.Sprintf("static mapping for %s not found", hostName)
 		return nil, errors.New(errorMessage)
 	}
-	msg.Authoritative = true
-	dom := question.Name
-	msg.Answer = make([]dns.RR, 1)
-	msg.Answer[0] = &dns.A{
-		Hdr: dns.RR_Header{Name: dom, Rrtype: question.Qtype, Class: question.Qclass, Ttl: 3600},
+	response := new(dns.Msg)
+	response.SetReply(msg)
+
+	response.Authoritative = true
+	response.RecursionDesired = false
+	response.Answer = make([]dns.RR, 1)
+	response.Answer[0] = &dns.A{
+		Hdr: dns.RR_Header{Name: question.Name, Rrtype: question.Qtype, Class: question.Qclass, Ttl: 180},
 		A:   net.ParseIP(ip),
 	}
-	return msg, nil
+	return response, nil
 }
 
 func (resolver StaticHostsResolver) GetName() string {

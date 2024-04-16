@@ -99,9 +99,11 @@ func (dres Dres) HandleFunc(writer dns.ResponseWriter, msg *dns.Msg) {
 			log.Printf("    Resolver %s failed to handle query: %s", resolver.GetName(), err)
 		} else {
 			log.Printf("    Answer from resolver %s", resolver.GetName())
+			response.Compress = true
 			if writer.WriteMsg(response) != nil {
 				log.Printf("    Unable to response. See error %s", err)
 			} else {
+				_ = writer.Close()
 				return
 			}
 		}

@@ -90,23 +90,23 @@ func (dres Dres) GetResolvers(addr net.Addr) []Resolver {
 func (dres Dres) HandleFunc(writer dns.ResponseWriter, msg *dns.Msg) {
 	log.Printf("Request from %s", writer.RemoteAddr())
 	for _, question := range msg.Question {
-		log.Printf("  Question %s", question.Name)
+		log.Printf("  Question: %d", question.String())
 	}
 
 	for _, resolver := range dres.GetResolvers(writer.RemoteAddr()) {
 		response, err := resolver.Handle(msg)
 		if err != nil {
-			log.Printf("Resolver %s failed to handle query: %s", resolver.GetName(), err)
+			log.Printf("    Resolver %s failed to handle query: %s", resolver.GetName(), err)
 		} else {
-			log.Printf("Answer from resolver %s", resolver.GetName())
+			log.Printf("    Answer from resolver %s", resolver.GetName())
 			if writer.WriteMsg(response) != nil {
-				log.Printf("Unable to response. See error %s", err)
+				log.Printf("    Unable to response. See error %s", err)
 			} else {
 				return
 			}
 		}
 	}
-	log.Printf("Query from %s not handled", writer.RemoteAddr())
+	log.Printf("    Query from %s not handled", writer.RemoteAddr())
 	_ = writer.Close()
 }
 

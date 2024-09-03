@@ -90,7 +90,7 @@ func (dres Dres) GetResolvers(addr net.Addr) []Resolver {
 func (dres Dres) HandleFunc(writer dns.ResponseWriter, msg *dns.Msg) {
 	log.Printf("Request from %s", writer.RemoteAddr())
 	for _, question := range msg.Question {
-		log.Printf("  Question: %d", question.String())
+		log.Printf("  Question: %s", question.String())
 	}
 
 	for _, resolver := range dres.GetResolvers(writer.RemoteAddr()) {

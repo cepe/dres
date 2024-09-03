@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs = {
-        url = "github:nixos/nixpkgs/nixos-23.11";
+        url = "github:nixos/nixpkgs/nixos-24.05";
     };
   };
 
@@ -65,7 +65,7 @@
         packages.x86_64-linux.default = pkgs.buildGoModule {
             name = "dres";
             src = ./.;
-            vendorHash = "sha256-oykO6hdG/7avEF/aRY2Nw4D+qSnWiUZiYxEK33inFKg=";
+            vendorHash = "sha256-EDCaFzQmZ/ftLaQ4rvA3Zm3iyvM8gnL0Q15pc/9fTjI=";
         };
     };
 }

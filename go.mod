@@ -2,7 +2,7 @@ module dres
 
 go 1.21
 
-require github.com/miekg/dns v1.1.62
+require github.com/miekg/dns v1.1.63
 
 require (
 	golang.org/x/mod v0.20.0 // indirect
